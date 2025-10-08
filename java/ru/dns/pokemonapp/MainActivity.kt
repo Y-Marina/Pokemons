@@ -17,6 +17,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import dagger.hilt.android.AndroidEntryPoint
+import ru.dns.pokemonapp.pokemonList.PokemonListScreen
 import ru.dns.pokemonapp.ui.theme.PokemonAppTheme
 
 @AndroidEntryPoint
@@ -33,6 +34,7 @@ class MainActivity : ComponentActivity() {
                     startDestination = "pokemon_list_screen"
                 ) {
                     composable("pokemon_list_screen") {
+                        PokemonListScreen(navController = navController)
                     }
                     composable(
                         "pokemon_detail_screen/{dominantColor}/{pokemonName}",
@@ -54,14 +56,14 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    topBar = {
-                        TopAppBarDefaults
-                    }
-                ) { innerPadding ->
-
-                }
+//                Scaffold(
+//                    modifier = Modifier.fillMaxSize(),
+//                    topBar = {
+//                        TopAppBarDefaults
+//                    }
+//                ) { innerPadding ->
+//
+//                }
             }
         }
     }
