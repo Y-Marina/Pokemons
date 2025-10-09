@@ -2,6 +2,7 @@ package ru.dns.pokemonapp.pokemonList
 
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.media.Image
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
@@ -14,7 +15,7 @@ import javax.inject.Inject
 class PokemonListViewModel @Inject constructor(
     private val repository: PokemonRepository
 ) : ViewModel() {
-    fun calcDominantColor(drawable: Image, onFinish: (Color) -> Unit) {
+    fun calcDominantColor(drawable: Drawable, onFinish: (Color) -> Unit) {
         val bmp = (drawable as BitmapDrawable)
             .bitmap
             .copy(Bitmap.Config.ARGB_8888, true)
