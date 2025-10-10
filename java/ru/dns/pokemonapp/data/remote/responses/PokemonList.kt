@@ -12,7 +12,7 @@ data class PokemonList(
     val next: String,
 
     @SerialName("previous")
-    val previous: Int,
+    val previous: String,
 
     @SerialName("results")
     val results: List<PokemonListItem>

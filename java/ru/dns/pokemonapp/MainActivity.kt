@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
@@ -28,42 +29,43 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PokemonAppTheme {
-                val navController = rememberNavController()
-                NavHost(
-                    navController = navController,
-                    startDestination = "pokemon_list_screen"
-                ) {
-                    composable("pokemon_list_screen") {
-                        PokemonListScreen(navController = navController)
+
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    topBar = {
+                        TopAppBarDefaults
                     }
-                    composable(
-                        "pokemon_detail_screen/{dominantColor}/{pokemonName}",
-                        arguments = listOf(
-                            navArgument("dominantColor") {
-                                type = NavType.IntType
-                            },
-                            navArgument("pokemonName") {
-                                type = NavType.StringType
-                            }
-                        )
+                ) { innerPadding ->
+                    val navController = rememberNavController()
+                    NavHost(
+                        modifier = Modifier.padding(innerPadding),
+                        navController = navController,
+                        startDestination = "pokemon_list_screen"
                     ) {
-                        val dominantColor = remember {
-                            val color = it.arguments?.getInt("dominantColor")
-                            color?.let { Color(it) } ?: Color.White
+                        composable("pokemon_list_screen") {
+                            PokemonListScreen(navController = navController)
                         }
-                        val pokemonName = remember {
-                            it.arguments?.getString("pokemonName")
+                        composable(
+                            "pokemon_detail_screen/{dominantColor}/{pokemonName}",
+                            arguments = listOf(
+                                navArgument("dominantColor") {
+                                    type = NavType.IntType
+                                },
+                                navArgument("pokemonName") {
+                                    type = NavType.StringType
+                                }
+                            )
+                        ) {
+                            val dominantColor = remember {
+                                val color = it.arguments?.getInt("dominantColor")
+                                color?.let { Color(it) } ?: Color.White
+                            }
+                            val pokemonName = remember {
+                                it.arguments?.getString("pokemonName")
+                            }
                         }
                     }
                 }
-//                Scaffold(
-//                    modifier = Modifier.fillMaxSize(),
-//                    topBar = {
-//                        TopAppBarDefaults
-//                    }
-//                ) { innerPadding ->
-//
-//                }
             }
         }
     }

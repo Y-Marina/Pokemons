@@ -4,9 +4,10 @@ import android.content.res.Resources
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,10 +15,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -28,6 +31,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Center
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -63,14 +68,16 @@ fun PokemonListScreen(
                 contentDescription = "Pokemon",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
+                    .align(CenterHorizontally)
             )
             SearchBar(
                 hint = "Search...",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-            ) {  }
+            ) { }
+            Spacer(modifier = Modifier.height(16.dp))
+            PokemonList(navController = navController)
         }
     }
 }
@@ -97,14 +104,14 @@ fun SearchBar(
             },
             maxLines = 1,
             singleLine = true,
-            textStyle = TextStyle(Color.Black),
+            textStyle = TextStyle(color = Color.Black),
             modifier = Modifier
                 .fillMaxWidth()
                 .shadow(5.dp, CircleShape)
                 .background(Color.White, CircleShape)
                 .padding(horizontal = 20.dp, vertical = 12.dp)
                 .onFocusChanged {
-                    isHintDisplayed = it.isFocused
+                    isHintDisplayed != it.isFocused
                 }
         )
         if (isHintDisplayed) {
@@ -114,6 +121,49 @@ fun SearchBar(
                 modifier = Modifier
                     .padding(horizontal = 20.dp, vertical = 12.dp)
             )
+        }
+    }
+}
+
+@Composable
+fun PokemonList(
+    navController: NavController,
+    viewModel: PokemonListViewModel = hiltViewModel<PokemonListViewModel>()
+) {
+    val pokemonList by remember { viewModel.pokemonList }
+    val endReached by remember { viewModel.endReached }
+    val loadError by remember { viewModel.loadError }
+    val isLoading by remember { viewModel.isLoading }
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(pokemonList.size) {
+            if (it >= pokemonList.size - 1 && !endReached) {
+                println("myTag Load")
+                viewModel.loadPokemonPaginated()
+            }
+            PokemonEntry(
+                entry = pokemonList[it],
+                navController = navController
+            )
+        }
+    }
+
+    Box(
+        contentAlignment = Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+        }
+        if (loadError.isNotEmpty()) {
+            RetrySection(error = loadError) {
+                viewModel.loadPokemonPaginated()
+            }
         }
     }
 }
@@ -131,7 +181,7 @@ fun PokemonEntry(
     }
 
     Box(
-        contentAlignment = Alignment.Center,
+        contentAlignment = Center,
         modifier = modifier
             .shadow(5.dp, RoundedCornerShape(10.dp))
             .clip(RoundedCornerShape(10.dp))
@@ -152,7 +202,10 @@ fun PokemonEntry(
     ) {
         Column {
             var isLoading by remember { mutableStateOf(false) }
-            Box {
+            Box(
+                contentAlignment = Center,
+                modifier = modifier.fillMaxWidth()
+            ) {
                 AsyncImage(
                     model = entry.imageUrl,
                     contentDescription = entry.pokemonName,
@@ -176,43 +229,31 @@ fun PokemonEntry(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
-
-                Text(
-                    text = entry.pokemonName,
-                    fontFamily = RobotoCondensed,
-                    fontSize = 20.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
             }
+            Text(
+                text = entry.pokemonName,
+                fontFamily = RobotoCondensed,
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
 
 @Composable
-fun PokemonRow(
-    rowIndex: Int,
-    entries: List<PokemonListEntry>,
-    navController: NavController
+fun RetrySection(
+    error: String,
+    onRetry: () -> Unit
 ) {
     Column {
-        Row {
-            PokemonEntry(
-                entry = entries[rowIndex * 2],
-                navController = navController,
-                modifier = Modifier.weight(1f)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            if (entries.size >= rowIndex * 2 + 2) {
-                PokemonEntry(
-                    entry = entries[rowIndex * 2 + 1],
-                    navController = navController,
-                    modifier = Modifier.weight(1f)
-                )
-            } else {
-                Spacer(modifier = Modifier.weight(1f))
-            }
+        Text(error, color = Color.Red, fontSize = 18.sp)
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            onClick = { onRetry() },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text(text = "Retry")
         }
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }
