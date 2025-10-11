@@ -46,6 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil3.asDrawable
 import coil3.compose.AsyncImage
@@ -55,7 +56,8 @@ import ru.dns.pokemonapp.ui.theme.RobotoCondensed
 
 @Composable
 fun PokemonListScreen(
-    navController: NavController
+    navController: NavController,
+    viewModel: PokemonListViewModel = hiltViewModel<PokemonListViewModel>()
 ) {
     Surface(
         color = MaterialTheme.colorScheme.background,
@@ -75,7 +77,9 @@ fun PokemonListScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-            ) { }
+            ) {
+                viewModel.searchPokemonList(it)
+            }
             Spacer(modifier = Modifier.height(16.dp))
             PokemonList(navController = navController)
         }
@@ -114,7 +118,7 @@ fun SearchBar(
                     isHintDisplayed != it.isFocused
                 }
         )
-        if (isHintDisplayed) {
+        if (isHintDisplayed && text.isEmpty()) {
             Text(
                 text = hint,
                 color = Color.LightGray,
@@ -134,6 +138,7 @@ fun PokemonList(
     val endReached by remember { viewModel.endReached }
     val loadError by remember { viewModel.loadError }
     val isLoading by remember { viewModel.isLoading }
+    val isSearching by remember { viewModel.isSearching }
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -142,8 +147,7 @@ fun PokemonList(
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(pokemonList.size) {
-            if (it >= pokemonList.size - 1 && !endReached) {
-                println("myTag Load")
+            if (it >= pokemonList.size - 1 && !endReached && !isLoading && !isSearching) {
                 viewModel.loadPokemonPaginated()
             }
             PokemonEntry(
