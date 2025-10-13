@@ -2,6 +2,7 @@ package ru.dns.pokemonapp.repository
 
 import dagger.hilt.android.scopes.ActivityScoped
 import ru.dns.pokemonapp.data.remote.PokeApi
+import ru.dns.pokemonapp.data.remote.responses.Pokemon
 import ru.dns.pokemonapp.data.remote.responses.PokemonList
 import ru.dns.pokemonapp.data.remote.responses.PokemonListItem
 import ru.dns.pokemonapp.util.Resource
@@ -20,7 +21,7 @@ class PokemonRepository @Inject constructor(
         return Resource.Success(response)
     }
 
-    suspend fun getPokemonInfo(pokemonName: String): Resource<PokemonListItem> {
+    suspend fun getPokemonInfo(pokemonName: String): Resource<Pokemon> {
         val response = try {
             api.getPokemonInfo(pokemonName)
         } catch (e: Exception) {
