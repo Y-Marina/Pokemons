@@ -4,7 +4,6 @@ import dagger.hilt.android.scopes.ActivityScoped
 import ru.dns.pokemonapp.data.remote.PokeApi
 import ru.dns.pokemonapp.data.remote.responses.Pokemon
 import ru.dns.pokemonapp.data.remote.responses.PokemonList
-import ru.dns.pokemonapp.data.remote.responses.PokemonListItem
 import ru.dns.pokemonapp.util.Resource
 import javax.inject.Inject
 
